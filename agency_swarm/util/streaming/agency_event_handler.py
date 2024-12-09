@@ -4,6 +4,7 @@ from openai.lib.streaming import AssistantEventHandler
 from openai.types.beta.threads.runs.run_step import RunStep
 from typing_extensions import override
 
+from agency_swarm.util.constants import DEFAULT_MODEL
 from agency_swarm.util.oai import get_tracker
 
 
@@ -43,7 +44,7 @@ class AgencyEventHandlerWithTracking(AgencyEventHandler):
         """
         if run_step.usage:
             tracker = get_tracker()
-            model = cls.agent.model if cls.agent else "gpt-4o"
+            model = cls.agent.model if cls.agent else DEFAULT_MODEL
             tracker.track_usage(
                 usage=run_step.usage,
                 assistant_id=run_step.assistant_id,

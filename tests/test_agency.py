@@ -51,6 +51,7 @@ class AgencyTest(unittest.TestCase):
         cls.agent2 = None
         cls.agency = None
         cls.client = get_openai_client()
+        cls.client.timeout = 60.0
 
         # testing loading agents from db
         cls.loaded_thread_ids = {}
