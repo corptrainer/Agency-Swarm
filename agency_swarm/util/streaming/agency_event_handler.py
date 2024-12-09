@@ -1,8 +1,8 @@
 from abc import ABC
-from typing import override
 
 from openai.lib.streaming import AssistantEventHandler
 from openai.types.beta.threads.runs.run_step import RunStep
+from typing_extensions import override
 
 from agency_swarm.util.oai import get_tracker
 
