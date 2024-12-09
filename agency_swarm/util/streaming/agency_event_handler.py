@@ -43,11 +43,12 @@ class AgencyEventHandlerWithTracking(AgencyEventHandler):
         """
         if run_step.usage:
             tracker = get_tracker()
+            model = cls.agent.model if cls.agent else "gpt-4o"
             tracker.track_usage(
                 usage=run_step.usage,
                 assistant_id=run_step.assistant_id,
                 thread_id=run_step.thread_id,
                 sender_agent_name=cls.agent_name,
                 recipient_agent_name=cls.recipient_agent_name,
-                model="gpt-4o",  # TODO: RunStep does not contain model information
+                model=model,
             )
