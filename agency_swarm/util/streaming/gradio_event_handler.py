@@ -1,5 +1,5 @@
 import queue
-from typing import Type, override
+from typing import Type
 
 from openai.types.beta.threads import Message
 from openai.types.beta.threads.runs.run_step import RunStep
@@ -9,6 +9,7 @@ from openai.types.beta.threads.runs.tool_call import (
     FunctionToolCall,
     ToolCall,
 )
+from typing_extensions import override
 
 from agency_swarm.messages import MessageOutput
 from agency_swarm.util.streaming import (

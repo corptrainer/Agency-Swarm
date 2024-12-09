@@ -1,4 +1,4 @@
-from typing import Type, override
+from typing import Type
 
 from openai.types.beta.threads import Message
 from openai.types.beta.threads.runs import RunStep
