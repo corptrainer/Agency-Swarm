@@ -5,8 +5,8 @@ load_dotenv()
 from agency_swarm import Agency, Agent
 from agency_swarm.util.oai import _get_openai_module, set_tracker
 
-TRACKER = "sqlite"
-# TRACKER = "langfuse"
+# TRACKER = "sqlite"
+TRACKER = "langfuse"
 
 if TRACKER == "sqlite":
     # Test SQLite configuration

@@ -78,6 +78,7 @@ class Thread:
                     **example,
                 )
 
+    @get_tracker().get_observe_decorator()
     def get_completion_stream(
         self,
         message: Union[str, List[dict], None],
@@ -101,6 +102,7 @@ class Thread:
             response_format=response_format,
         )
 
+    @get_tracker().get_observe_decorator()
     def get_completion(
         self,
         message: Union[str, List[dict], None],
