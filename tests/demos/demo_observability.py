@@ -27,7 +27,7 @@ ceo = Agent(
 developer = Agent(
     name="Developer",
     description="Implements technical solutions and writes code",
-    temperature=0.7,
+    temperature=0.3,
 )
 
 analyst = Agent(

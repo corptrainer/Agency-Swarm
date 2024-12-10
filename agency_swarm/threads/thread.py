@@ -15,7 +15,7 @@ from agency_swarm.agents import Agent
 from agency_swarm.messages import MessageOutput
 from agency_swarm.tools import CodeInterpreter, FileSearch
 from agency_swarm.user import User
-from agency_swarm.util.oai import get_openai_client
+from agency_swarm.util.oai import get_openai_client, get_tracker
 from agency_swarm.util.streaming.agency_event_handler import AgencyEventHandler
 
 
@@ -61,6 +61,7 @@ class Thread:
             "incomplete",
         ]
 
+    @get_tracker().get_observe_decorator()
     def init_thread(self):
         self._called_recepients = []
         self._num_run_retries = 0
@@ -577,6 +578,7 @@ class Thread:
 
         return messages.data[0].content[0].text.value
 
+    @get_tracker().get_observe_decorator()
     def _get_last_assistant_message(self):
         messages = self.client.beta.threads.messages.list(thread_id=self.id, limit=1)
 
@@ -586,10 +588,20 @@ class Thread:
         message = messages.data[0]
 
         if message.role == "assistant":
+            # Track the assistant message using the configured tracker
+            tracker = get_tracker()
+            if tracker:
+                tracker.track_assistant_message(
+                    client=self.client,
+                    thread_id=self.id,
+                    run_id=self._run.id,
+                    message_content=message.content[0].text.value,
+                )
             return message
 
         raise Exception("No assistant message found in the thread")
 
+    @get_tracker().get_observe_decorator()
     def create_message(
         self, message: str, role: str = "user", attachments: List[dict] = None
     ):

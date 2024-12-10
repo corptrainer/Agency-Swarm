@@ -44,7 +44,11 @@ class AgencyEventHandlerWithTracking(AgencyEventHandler):
         """
         if run_step.usage:
             tracker = get_tracker()
-            model = cls.agent.model if cls.agent else DEFAULT_MODEL
+            model = (
+                getattr(cls.agent, "model", None)
+                or getattr(cls.recipient_agent, "model", None)
+                or DEFAULT_MODEL
+            )
             tracker.track_usage(
                 usage=run_step.usage,
                 assistant_id=run_step.assistant_id,

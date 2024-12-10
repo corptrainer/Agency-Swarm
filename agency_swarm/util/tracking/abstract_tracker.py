@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from openai.types.beta.threads.runs.run_step import Usage
 
@@ -7,6 +8,21 @@ class AbstractTracker(ABC):
     """
     Abstract interface for usage tracking implementations.
     """
+
+    @abstractmethod
+    def track_assistant_message(
+        self, client: Any, thread_id: str, run_id: str, message_content: str
+    ):
+        """
+        Track an assistant message with detailed context.
+
+        Args:
+            client: The OpenAI client instance
+            thread_id (str): ID of the thread
+            run_id (str): ID of the run
+            message_content (str): The content of the assistant's message
+        """
+        pass
 
     @abstractmethod
     def track_usage(
