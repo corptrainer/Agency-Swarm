@@ -63,12 +63,7 @@ class LangfuseTracker(AbstractTracker):
                 "sender_agent_name": sender_agent_name,
                 "recipient_agent_name": recipient_agent_name,
             },
-            usage={
-                "input": usage.prompt_tokens,
-                "output": usage.completion_tokens,
-                "total": usage.total_tokens,
-                "unit": "TOKENS",
-            },
+            usage=usage,
         )
 
     def get_total_tokens(self) -> Usage:
