@@ -9,17 +9,13 @@ from .util import (
     set_openai_key,
     set_tracker,
 )
-from .util.streaming import (
-    AgencyEventHandler,
-    AgencyEventHandlerWithTracking,
-)
+from .util.streaming import AgencyEventHandler
 
 __all__ = [
     "Agency",
     "Agent",
     "BaseTool",
     "AgencyEventHandler",
-    "AgencyEventHandlerWithTracking",
     "get_openai_client",
     "set_openai_client",
     "set_openai_key",

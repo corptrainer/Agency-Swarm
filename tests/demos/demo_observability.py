@@ -2,19 +2,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import openai
+
 from agency_swarm import Agency, Agent
-from agency_swarm.util.oai import _get_openai_module, set_tracker
+from agency_swarm.util.oai import get_tracker, set_tracker
 
-# TRACKER = "sqlite"
-TRACKER = "langfuse"
+TRACKER = "local"
+# TRACKER = "langfuse"
 
-if TRACKER == "sqlite":
+if TRACKER == "local":
     # Test SQLite configuration
-    set_tracker("sqlite")
+    set_tracker("local")
 elif TRACKER == "langfuse":
     # Test Langfuse configuration
     set_tracker("langfuse")
-    openai = _get_openai_module()
     openai.langfuse_auth_check()
 
 # Create multiple agents with different roles
@@ -49,4 +50,6 @@ agency = Agency(
 # Run the demo with Gradio interface
 agency.demo_gradio()
 # Run the CLI demo
-agency.run_demo()
+# agency.run_demo()
+
+print(get_tracker().get_total_tokens())

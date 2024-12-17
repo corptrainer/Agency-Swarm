@@ -4,10 +4,8 @@ import threading
 
 from openai.types.beta.threads.runs.run_step import Usage
 
-from agency_swarm.util.tracking.abstract_tracker import AbstractTracker
 
-
-class SQLiteTracker(AbstractTracker):
+class LocalTracker:
     def __init__(self, db_path: str = "usage.db"):
         """
         Initializes a SQLite-based usage tracker.
@@ -26,23 +24,31 @@ class SQLiteTracker(AbstractTracker):
                 """
                 CREATE TABLE IF NOT EXISTS usage_tracking (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                     prompt_tokens INTEGER,
                     completion_tokens INTEGER,
                     total_tokens INTEGER,
-                    assistant_id TEXT,
-                    thread_id TEXT,
-                    run_id TEXT,
-                    model TEXT,
                     sender_agent_name TEXT,
                     recipient_agent_name TEXT,
                     message_content TEXT,
                     input_messages TEXT,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                    model TEXT,
+                    assistant_id TEXT,
+                    thread_id TEXT,
+                    run_id TEXT
                 )
             """
             )
 
-    def track_assistant_message(self, client, thread_id, run_id, message_content):
+    def track_assistant_message(
+        self,
+        client,
+        thread_id,
+        run_id,
+        message_content,
+        sender_agent_name: str,
+        recipient_agent_name: str,
+    ):
         """
         Track an assistant message with detailed context in SQLite.
         """
@@ -64,48 +70,20 @@ class SQLiteTracker(AbstractTracker):
                 self.conn.execute(
                     """
                     INSERT INTO usage_tracking
-                    (thread_id, run_id, message_content, input_messages, model,
-                     prompt_tokens, completion_tokens, total_tokens)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    (message_content, input_messages, model, assistant_id, thread_id, run_id,
+                     prompt_tokens, completion_tokens, total_tokens, sender_agent_name, recipient_agent_name)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
-                        thread_id,
-                        run_id,
                         message_content,
                         json.dumps(input_messages),
                         run.model,
+                        run.assistant_id,
+                        thread_id,
+                        run_id,
                         run.usage.prompt_tokens if run.usage else None,
                         run.usage.completion_tokens if run.usage else None,
                         run.usage.total_tokens if run.usage else None,
-                    ),
-                )
-
-    def track_usage(
-        self,
-        usage: Usage,
-        assistant_id: str,
-        thread_id: str,
-        model: str,
-        sender_agent_name: str,
-        recipient_agent_name: str,
-    ) -> None:
-        with self.lock:
-            if self._closed:
-                raise RuntimeError("Attempting to track usage on a closed tracker.")
-            with self.conn:
-                self.conn.execute(
-                    """
-                    INSERT INTO usage_tracking (prompt_tokens, completion_tokens, total_tokens,
-                    assistant_id, thread_id, model, sender_agent_name, recipient_agent_name)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        usage.prompt_tokens,
-                        usage.completion_tokens,
-                        usage.total_tokens,
-                        assistant_id,
-                        thread_id,
-                        model,
                         sender_agent_name,
                         recipient_agent_name,
                     ),

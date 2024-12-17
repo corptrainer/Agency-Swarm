@@ -12,74 +12,6 @@ def langfuse_tracker():
     yield tracker
 
 
-@patch("agency_swarm.util.tracking.langfuse_tracker.Langfuse")
-def test_langfuse_track_and_get_total_tokens(mock_langfuse, langfuse_tracker):
-    # Create mock instance and set it as the client
-    mock_langfuse_instance = MagicMock()
-    mock_langfuse_instance.generation = MagicMock()
-    mock_langfuse_instance.fetch_observations.return_value = MagicMock(
-        data=[MagicMock(usage=MagicMock(input=10, output=5, total=15))]
-    )
-    mock_langfuse.return_value = mock_langfuse_instance
-    langfuse_tracker.client = mock_langfuse_instance
-
-    usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
-    langfuse_tracker.track_usage(
-        usage=usage,
-        assistant_id="test_assistant",
-        thread_id="test_thread",
-        model="gpt-4o",
-        sender_agent_name="sender",
-        recipient_agent_name="recipient",
-    )
-
-    totals = langfuse_tracker.get_total_tokens()
-    assert totals == usage
-
-
-@patch("agency_swarm.util.tracking.langfuse_tracker.Langfuse")
-@patch("agency_swarm.util.tracking.langfuse_tracker.langfuse_context")
-def test_langfuse_track_usage(mock_langfuse_context, mock_langfuse, langfuse_tracker):
-    # Create mock instance and set it as the client
-    mock_langfuse_instance = MagicMock()
-    mock_langfuse_instance.generation = MagicMock()
-    mock_langfuse.return_value = mock_langfuse_instance
-    langfuse_tracker.client = mock_langfuse_instance
-
-    # Mock context values
-    mock_langfuse_context.get_current_trace_id.return_value = "test_trace"
-    mock_langfuse_context.get_current_observation_id.return_value = "test_observation"
-
-    usage = Usage(prompt_tokens=20, completion_tokens=10, total_tokens=30)
-
-    langfuse_tracker.track_usage(
-        usage=usage,
-        assistant_id="test_assistant",
-        thread_id="test_thread",
-        model="gpt-4o",
-        sender_agent_name="sender",
-        recipient_agent_name="recipient",
-    )
-
-    mock_langfuse_instance.generation.assert_called_once_with(
-        trace_id="test_trace",
-        parent_observation_id="test_observation",
-        model="gpt-4o",
-        metadata={
-            "assistant_id": "test_assistant",
-            "thread_id": "test_thread",
-            "sender_agent_name": "sender",
-            "recipient_agent_name": "recipient",
-        },
-        usage={
-            "input": 20,
-            "output": 10,
-            "total": 30,
-            "unit": "TOKENS",
-        },
-    )
-
-
 @patch("agency_swarm.util.tracking.langfuse_tracker.langfuse_context")
 def test_langfuse_track_assistant_message(mock_langfuse_context, langfuse_tracker):
     # Mock OpenAI client and responses
@@ -96,6 +28,7 @@ def test_langfuse_track_assistant_message(mock_langfuse_context, langfuse_tracke
     mock_run = MagicMock()
     mock_run.model = "gpt-4o"  # Match the model name in the test
     mock_run.usage = Usage(prompt_tokens=10, completion_tokens=5, total_tokens=15)
+    mock_run.assistant_id = "test_assistant"
     mock_client.beta.threads.runs.retrieve.return_value = mock_run
 
     # Mock langfuse context
@@ -109,6 +42,8 @@ def test_langfuse_track_assistant_message(mock_langfuse_context, langfuse_tracke
         thread_id="test_thread",
         run_id="test_run",
         message_content="Test response",
+        sender_agent_name="sender",
+        recipient_agent_name="recipient",
     )
 
     # Verify langfuse generation was called correctly
@@ -119,6 +54,12 @@ def test_langfuse_track_assistant_message(mock_langfuse_context, langfuse_tracke
         usage=mock_run.usage,
         input=[{"role": "user", "content": "Hello"}],
         output="Test response",
+        metadata={
+            "assistant_id": "test_assistant",
+            "thread_id": "test_thread",
+            "sender_agent_name": "sender",
+            "recipient_agent_name": "recipient",
+        },
     )
 
 

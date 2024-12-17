@@ -2,6 +2,7 @@ import os
 import threading
 
 import httpx
+import openai
 from dotenv import load_dotenv
 
 from agency_swarm.util.tracking.tracker_factory import get_tracker_by_name
@@ -10,19 +11,18 @@ load_dotenv()
 
 client_lock = threading.Lock()
 client = None
-_openai_module = None
-_tracker = "sqlite"  # Default usage tracker
+_tracker = get_tracker_by_name("local")
 
 
-def set_tracker(tracker: str):
+def set_tracker(name: str):
     """Set the global usage tracker.
 
     Args:
-        tracker: The usage tracking mechanism to use.
+        name: The name of the usage tracking mechanism to use.
     """
-    global _tracker, client, _openai_module
+    global _tracker, client
     with client_lock:
-        _tracker = tracker
+        _tracker = get_tracker_by_name(name)
     client = get_openai_client()
 
 
@@ -30,17 +30,15 @@ def get_tracker():
     """Get the current usage tracker instance.
 
     Returns:
-        AbstractTracker: The current usage tracker instance.
+        Tracker: The current usage tracker instance.
     """
-    return get_tracker_by_name(_tracker)
+    return _tracker
 
 
 def get_openai_client():
     global client
     with client_lock:
         if client is None:
-            openai = _get_openai_module()
-
             # Check if the API key is set
             api_key = openai.api_key or os.getenv("OPENAI_API_KEY")
             if api_key is None:
@@ -67,28 +65,8 @@ def set_openai_key(key: str):
     if not key:
         raise ValueError("Invalid API key. The API key cannot be empty.")
 
-    openai = _get_openai_module()
     openai.api_key = key
 
     global client
     with client_lock:
         client = None
-
-
-def _get_openai_module() -> object:
-    """Get the appropriate OpenAI module based on the global usage tracker."""
-    global _openai_module
-    if _openai_module is None:
-        try:
-            # Use Langfuse OpenAI client if configured
-            if _tracker == "langfuse" and all(
-                os.getenv(key) for key in ["LANGFUSE_SECRET_KEY", "LANGFUSE_PUBLIC_KEY"]
-            ):
-                from langfuse.openai import openai
-            else:
-                # Default to standard OpenAI client
-                import openai
-            _openai_module = openai
-        except ImportError as e:
-            raise ImportError(f"Failed to import OpenAI module: {str(e)}")
-    return _openai_module

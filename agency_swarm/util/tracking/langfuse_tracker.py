@@ -4,16 +4,20 @@ from langfuse import Langfuse
 from langfuse.decorators import langfuse_context, observe
 from openai.types.beta.threads.runs.run_step import Usage
 
-from agency_swarm.util.tracking.abstract_tracker import AbstractTracker
 
-
-class LangfuseTracker(AbstractTracker):
+class LangfuseTracker:
     def __init__(self):
         self.client = Langfuse()
 
     @observe
     def track_assistant_message(
-        self, client: Any, thread_id: str, run_id: str, message_content: str
+        self,
+        client: Any,
+        thread_id: str,
+        run_id: str,
+        message_content: str,
+        sender_agent_name: str,
+        recipient_agent_name: str,
     ):
         """
         Track an assistant message with detailed context using langfuse.
@@ -39,31 +43,12 @@ class LangfuseTracker(AbstractTracker):
             usage=run.usage,
             input=input_messages,
             output=message_content,
-        )
-
-    def track_usage(
-        self,
-        usage: Usage,
-        assistant_id: str,
-        thread_id: str,
-        model: str,
-        sender_agent_name: str,
-        recipient_agent_name: str,
-    ) -> None:
-        """
-        Track usage by recording a generation event in Langfuse.
-        """
-        self.client.generation(
-            trace_id=langfuse_context.get_current_trace_id(),
-            parent_observation_id=langfuse_context.get_current_observation_id(),
-            model=model,
             metadata={
-                "assistant_id": assistant_id,
+                "assistant_id": run.assistant_id,
                 "thread_id": thread_id,
                 "sender_agent_name": sender_agent_name,
                 "recipient_agent_name": recipient_agent_name,
             },
-            usage=usage,
         )
 
     def get_total_tokens(self) -> Usage:

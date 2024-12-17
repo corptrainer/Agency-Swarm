@@ -53,6 +53,8 @@ class Thread:
         # needed to prevent agents calling the same recepient agent multiple times
         self._called_recepients = []
 
+        self._tracker = get_tracker()
+
         self.terminal_states = [
             "cancelled",
             "completed",
@@ -385,6 +387,17 @@ class Thread:
                 last_message = message_obj.content[0].text.value
                 full_message += last_message
 
+                # Track the assistant message using the configured tracker
+                # if self._tracker:
+                #     self._tracker.track_assistant_message(
+                #         client=self.client,
+                #         thread_id=self.id,
+                #         run_id=self._run.id,
+                #         message_content=message.content[0].text.value,
+                #         sender_agent_name=self.agent.name,
+                #         recipient_agent_name=self.recipient_agent.name,
+                #     )
+
                 if yield_messages:
                     yield MessageOutput(
                         "text",
@@ -590,15 +603,6 @@ class Thread:
         message = messages.data[0]
 
         if message.role == "assistant":
-            # Track the assistant message using the configured tracker
-            tracker = get_tracker()
-            if tracker:
-                tracker.track_assistant_message(
-                    client=self.client,
-                    thread_id=self.id,
-                    run_id=self._run.id,
-                    message_content=message.content[0].text.value,
-                )
             return message
 
         raise Exception("No assistant message found in the thread")
