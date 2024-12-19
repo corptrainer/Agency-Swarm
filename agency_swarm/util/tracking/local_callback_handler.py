@@ -44,7 +44,14 @@ class LocalCallbackHandler(CallbackHandler):
         with self.conn:
             columns = ", ".join(kwargs.keys())
             placeholders = ", ".join("?" for _ in kwargs)
-            sql = f"INSERT INTO events (id, {columns}) VALUES (?, {placeholders})"
+            update_stmt = ", ".join(f"{k} = excluded.{k}" for k in kwargs.keys())
+            sql = f"""
+                INSERT INTO events (id, {columns})
+                VALUES (?, {placeholders})
+                ON CONFLICT(id) DO UPDATE SET
+                {update_stmt}
+                WHERE id = excluded.id
+            """
             self.conn.execute(sql, (str(run_id), *kwargs.values()))
 
     def on_chain_start(
