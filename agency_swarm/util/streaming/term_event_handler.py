@@ -10,10 +10,7 @@ from openai.types.beta.threads.runs.tool_call import (
 from typing_extensions import override
 
 from agency_swarm.messages.message_output import MessageOutputLive
-from agency_swarm.util.streaming.agency_event_handler import (
-    AgencyEventHandler,
-    AgencyEventHandlerWithTracking,
-)
+from agency_swarm.util.streaming.agency_event_handler import AgencyEventHandler
 
 
 def create_term_handler(agency=None) -> Type[AgencyEventHandler]:
@@ -28,7 +25,7 @@ def create_term_handler(agency=None) -> Type[AgencyEventHandler]:
         Type[TermEventHandler]: A new TermEventHandler class with proper dependencies
     """
 
-    class TermEventHandler(AgencyEventHandlerWithTracking):
+    class TermEventHandler(AgencyEventHandler):
         _message_output = None
         _agency = agency
 

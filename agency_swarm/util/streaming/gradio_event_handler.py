@@ -12,10 +12,7 @@ from openai.types.beta.threads.runs.tool_call import (
 from typing_extensions import override
 
 from agency_swarm.messages import MessageOutput
-from agency_swarm.util.streaming import (
-    AgencyEventHandler,
-    AgencyEventHandlerWithTracking,
-)
+from agency_swarm.util.streaming import AgencyEventHandler
 
 
 def create_gradio_handler(chatbot_queue: queue.Queue) -> Type[AgencyEventHandler]:
@@ -30,7 +27,7 @@ def create_gradio_handler(chatbot_queue: queue.Queue) -> Type[AgencyEventHandler
         Type[GradioEventHandler]: A new GradioEventHandler class with proper dependencies
     """
 
-    class GradioHandler(AgencyEventHandlerWithTracking):
+    class GradioHandler(AgencyEventHandler):
         _chatbot_queue = chatbot_queue
         _message_output = None
 

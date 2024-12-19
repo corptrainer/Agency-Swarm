@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, ClassVar, Literal, Union
 
 from docstring_parser import parse
+from openai.types.beta.threads.runs.tool_call import ToolCall
 from pydantic import BaseModel
 
 from agency_swarm.util.shared_state import SharedState
@@ -11,7 +12,7 @@ class BaseTool(BaseModel, ABC):
     _shared_state: ClassVar[SharedState] = None
     _caller_agent: Any = None
     _event_handler: Any = None
-    _tool_call: Any = None
+    _tool_call: ToolCall = None
 
     def __init__(self, **kwargs):
         if not self.__class__._shared_state:

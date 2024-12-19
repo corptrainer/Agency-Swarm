@@ -34,7 +34,7 @@ class FinalizeAgency(BaseTool):
             f.close()
 
         res = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=examples
             + [
                 {"role": "user", "content": agency_py},
