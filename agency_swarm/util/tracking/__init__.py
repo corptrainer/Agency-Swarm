@@ -1,12 +1,11 @@
 import threading
 from typing import Callable, Literal
 
-from langfuse.callback import CallbackHandler as LangfuseCallbackHandler
-
-from .local_callback_handler import LocalCallbackHandler
-
 _callback_handler = None
 _lock = threading.Lock()
+
+
+SUPPORTED_TRACKERS = Literal["langfuse", "local"]
 
 
 def get_callback_handler():
@@ -21,17 +20,25 @@ def set_callback_handler(handler: Callable):
         _callback_handler = handler()
 
 
-def init_tracking(name: Literal["local", "langfuse"]):
-    if name == "local":
-        set_callback_handler(LocalCallbackHandler)
-    elif name == "langfuse":
-        set_callback_handler(LangfuseCallbackHandler)
-    else:
-        raise ValueError(f"Invalid tracker name: {name}")
+def init_tracking(tracker_name: SUPPORTED_TRACKERS, **kwargs):
+    if tracker_name not in SUPPORTED_TRACKERS:
+        raise ValueError(f"Invalid tracker name: {tracker_name}")
+
+    from .langchain_types import use_langchain_types
+
+    use_langchain_types()
+
+    if tracker_name == "local":
+        from .local_callback_handler import LocalCallbackHandler
+
+        set_callback_handler(lambda: LocalCallbackHandler(**kwargs))
+    elif tracker_name == "langfuse":
+        from langfuse.callback import CallbackHandler as LangfuseCallbackHandler
+
+        set_callback_handler(lambda: LangfuseCallbackHandler(**kwargs))
 
 
 __all__ = [
-    "LocalCallbackHandler",
     "init_tracking",
     "get_callback_handler",
     "set_callback_handler",

@@ -2,8 +2,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from agency_swarm import Agency, Agent
-from agency_swarm.util import get_callback_handler, init_tracking
+from agency_swarm import Agency, Agent  # noqa
+from agency_swarm.util import init_tracking  # noqa
 
 
 def main():
@@ -14,12 +14,6 @@ def main():
 
     # Initialize tracking based on the selected tracker
     init_tracking(TRACKER)
-
-    if TRACKER == "langfuse":
-        # Test Langfuse configuration
-        import openai
-
-        openai.langfuse_auth_check()
 
     # Create agents with different roles
     ceo = Agent(

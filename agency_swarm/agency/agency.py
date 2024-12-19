@@ -11,7 +11,6 @@ from typing import (
     Dict,
     List,
     Literal,
-    Optional,
     Type,
     TypedDict,
     TypeVar,
@@ -67,7 +66,7 @@ class Agency:
         max_prompt_tokens: int = None,
         max_completion_tokens: int = None,
         truncation_strategy: dict = None,
-        callback_handler: Optional[Any] = None,
+        callback_handler: Any = None,
     ):
         """
         Initializes the Agency object, setting up agents, threads, and core functionalities.
@@ -214,7 +213,7 @@ class Agency:
     def get_completion_stream(
         self,
         message: str,
-        event_handler: Optional[Type[AgencyEventHandler]] = None,
+        event_handler: Type[AgencyEventHandler] | None = None,
         message_files: List[str] = None,
         recipient_agent: Agent = None,
         additional_instructions: str = None,
@@ -348,7 +347,7 @@ class Agency:
         recipient_agent = self.main_recipients[0]
 
         chatbot_queue = queue.Queue()
-        gradio_handler = create_gradio_handler(chatbot_queue=chatbot_queue)
+        gradio_handler_class = create_gradio_handler(chatbot_queue=chatbot_queue)
 
         with gr.Blocks(js=js) as demo:
             chatbot = gr.Chatbot(height=height)
@@ -531,7 +530,7 @@ class Agency:
                     target=self.get_completion_stream,
                     args=(
                         original_message,
-                        gradio_handler,
+                        gradio_handler_class,
                         [],
                         recipient_agent,
                         "",
@@ -654,7 +653,7 @@ class Agency:
         """
         Executes agency in the terminal with autocomplete for recipient agent names.
         """
-        term_handler = create_term_handler(agency=self)
+        term_handler_class = create_term_handler(agency=self)
 
         self.recipient_agents = [str(agent.name) for agent in self.main_recipients]
 
@@ -687,7 +686,7 @@ class Agency:
 
             self.get_completion_stream(
                 message=text,
-                event_handler=term_handler,
+                event_handler=term_handler_class,
                 recipient_agent=recipient_agent,
             )
 

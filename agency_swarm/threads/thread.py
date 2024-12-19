@@ -5,10 +5,9 @@ import os
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Optional, Type, Union
+from typing import List, Type, Union
 from uuid import UUID
 
-from langchain.schema import AgentAction, AgentFinish, HumanMessage
 from openai import APIError, BadRequestError
 from openai.types.beta import AssistantToolChoice
 from openai.types.beta.threads.message import Attachment
@@ -21,6 +20,11 @@ from agency_swarm.user import User
 from agency_swarm.util.oai import get_openai_client
 from agency_swarm.util.streaming.agency_event_handler import AgencyEventHandler
 from agency_swarm.util.tracking import get_callback_handler
+from agency_swarm.util.tracking.langchain_types import (
+    AgentAction,
+    AgentFinish,
+    HumanMessage,
+)
 
 
 class Thread:
@@ -86,13 +90,13 @@ class Thread:
     def get_completion_stream(
         self,
         message: Union[str, List[dict], None],
-        event_handler: Optional[Type[AgencyEventHandler]] = None,
+        event_handler: Type[AgencyEventHandler] | None = None,
         message_files: List[str] = None,
-        attachments: Optional[List[Attachment]] = None,
+        attachments: List[Attachment] | None = None,
         recipient_agent: Agent = None,
         additional_instructions: str = None,
         tool_choice: AssistantToolChoice = None,
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
     ):
         return self.get_completion(
             message,
@@ -110,14 +114,14 @@ class Thread:
         self,
         message: Union[str, List[dict], None],
         message_files: List[str] = None,
-        attachments: Optional[List[dict]] = None,
+        attachments: List[dict] | None = None,
         recipient_agent: Union[Agent, None] = None,
         additional_instructions: str = None,
-        event_handler: Optional[Type[AgencyEventHandler]] = None,
+        event_handler: Type[AgencyEventHandler] | None = None,
         tool_choice: AssistantToolChoice = None,
         yield_messages: bool = False,
-        response_format: Optional[dict] = None,
-        parent_run_id: Optional[UUID] = None,
+        response_format: dict | None = None,
+        parent_run_id: UUID | None = None,
     ):
         self.init_thread()
 
@@ -220,25 +224,7 @@ class Thread:
                     )
                     tool_outputs_and_names = []  # list of tuples (name, tool_output)
 
-                    # on_agent_action before each tool call
-                    for tc in tool_calls:
-                        # Construct an AgentAction
-                        args = (
-                            json.loads(tc.function.arguments)
-                            if tc.function.arguments
-                            else {}
-                        )
-                        action = AgentAction(
-                            tool=tc.function.name,
-                            tool_input=args,
-                            log=f"Using tool {tc.function.name} with arguments: {args}",
-                        )
-                        if self.callback_handler:
-                            self.callback_handler.on_agent_action(
-                                action=action,
-                                run_id=self._run.id,
-                                parent_run_id=chain_run_id,
-                            )
+                    self._track_tool_calls(tool_calls, chain_run_id)
 
                     sync_tool_calls, async_tool_calls = self._get_sync_async_tool_calls(
                         tool_calls, recipient_agent
@@ -581,7 +567,7 @@ class Thread:
         event_handler,
         tool_choice,
         temperature=None,
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
     ):
         try:
             if event_handler:
@@ -920,3 +906,21 @@ class Thread:
                 break
 
         return all_messages
+
+    def _track_tool_calls(self, tool_calls: List[ToolCall], chain_run_id: str) -> None:
+        """Send agent_action before each tool call"""
+        if not self.callback_handler:
+            return
+
+        for tc in tool_calls:
+            args = json.loads(tc.function.arguments) if tc.function.arguments else {}
+            action = AgentAction(
+                tool=tc.function.name,
+                tool_input=args,
+                log=f"Using tool {tc.function.name} with arguments: {args}",
+            )
+            self.callback_handler.on_agent_action(
+                action=action,
+                run_id=self._run.id,
+                parent_run_id=chain_run_id,
+            )
