@@ -228,7 +228,11 @@ class Thread:
                             if tc.function.arguments
                             else {}
                         )
-                        action = AgentAction(tool=tc.function.name, tool_input=args)
+                        action = AgentAction(
+                            tool=tc.function.name,
+                            tool_input=args,
+                            log=f"Using tool {tc.function.name} with arguments: {args}",
+                        )
                         if self.callback_handler:
                             self.callback_handler.on_agent_action(
                                 action=action,
@@ -313,7 +317,8 @@ class Thread:
                                             parent_run_id=parent_run_id,
                                         )
                                         finish = AgentFinish(
-                                            return_values={"response": output}
+                                            return_values={"response": output},
+                                            log=output,
                                         )
                                         self.callback_handler.on_agent_finish(
                                             finish=finish,
@@ -356,7 +361,9 @@ class Thread:
                                     run_id=chain_run_id,
                                     parent_run_id=parent_run_id,
                                 )
-                                finish = AgentFinish(return_values={"response": output})
+                                finish = AgentFinish(
+                                    return_values={"response": output}, log=output
+                                )
                                 self.callback_handler.on_agent_finish(
                                     finish=finish,
                                     run_id=self._run.id,
@@ -548,7 +555,9 @@ class Thread:
                             parent_run_id=parent_run_id,
                         )
                         # agent finish
-                        finish = AgentFinish(return_values={"response": last_message})
+                        finish = AgentFinish(
+                            return_values={"response": last_message}, log=last_message
+                        )
                         self.callback_handler.on_agent_finish(
                             finish=finish,
                             run_id=self._run.id,
