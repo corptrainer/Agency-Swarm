@@ -54,6 +54,7 @@ class SendMessageSwarm(SendMessageBase):
                 recipient_agent=recipient_agent,
                 yield_messages=not self._event_handler,
                 event_handler=self._event_handler,
+                parent_run_id=thread._run.id,
             )
 
             return message or ""

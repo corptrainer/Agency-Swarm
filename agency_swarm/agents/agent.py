@@ -18,7 +18,7 @@ from agency_swarm.tools import (
 )
 from agency_swarm.tools.oai.FileSearch import FileSearchConfig
 from agency_swarm.util.constants import DEFAULT_MODEL
-from agency_swarm.util.oai import get_openai_client, get_tracker
+from agency_swarm.util.oai import get_openai_client
 from agency_swarm.util.openapi import validate_openapi_spec
 from agency_swarm.util.shared_state import SharedState
 
@@ -295,7 +295,6 @@ class Agent:
 
         return self
 
-    @get_tracker().get_observe_decorator()
     def _create_assistant(self):
         """Creates a new OpenAI assistant with the agent's current configuration."""
         return self.client.beta.assistants.create(

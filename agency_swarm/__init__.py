@@ -2,12 +2,13 @@ from .agency import Agency
 from .agents import Agent
 from .tools import BaseTool
 from .util import (
+    get_callback_handler,
     get_openai_client,
-    get_tracker,
+    init_tracking,
     llm_validator,
+    set_callback_handler,
     set_openai_client,
     set_openai_key,
-    set_tracker,
 )
 from .util.streaming import AgencyEventHandler
 
@@ -20,6 +21,7 @@ __all__ = [
     "set_openai_client",
     "set_openai_key",
     "llm_validator",
-    "set_tracker",
-    "get_tracker",
+    "init_tracking",
+    "get_callback_handler",
+    "set_callback_handler",
 ]
