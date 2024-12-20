@@ -1,16 +1,15 @@
 from dotenv import load_dotenv
 
-load_dotenv()
+from agency_swarm import Agency, Agent
+from agency_swarm.util import init_tracking
 
-from agency_swarm import Agency, Agent  # noqa
-from agency_swarm.util import init_tracking  # noqa
+load_dotenv()
 
 
 def main():
     # Set the tracker type
-    TRACKER = "local"
-    # To use Langfuse, uncomment the next line
-    # TRACKER = "langfuse"
+    # TRACKER = "local"
+    TRACKER = "langfuse"
 
     # Initialize tracking based on the selected tracker
     init_tracking(TRACKER)

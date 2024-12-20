@@ -3,7 +3,7 @@ from typing import Callable
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-from agency_swarm.util.constants import DEFAULT_MODEL_MINI
+from agency_swarm.constants import DEFAULT_MODEL_MINI
 from agency_swarm.util.oai import get_openai_client
 
 

@@ -1,14 +1,33 @@
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Any, Dict
+
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from langchain.schema import AgentAction as LangchainAgentAction
     from langchain.schema import AgentFinish as LangchainAgentFinish
     from langchain.schema import HumanMessage as LangchainHumanMessage
 
-# Define TypeVars that can be either our placeholder or langchain types
-AgentAction = TypeVar("AgentAction", bound="LangchainAgentAction")
-AgentFinish = TypeVar("AgentFinish", bound="LangchainAgentFinish")
-HumanMessage = TypeVar("HumanMessage", bound="LangchainHumanMessage")
+
+# Create base classes that match langchain's structure
+class BaseAgentAction(BaseModel):
+    tool: str
+    tool_input: Dict[str, Any] | str
+    log: str
+
+
+class BaseAgentFinish(BaseModel):
+    return_values: Dict[str, Any]
+    log: str
+
+
+class BaseHumanMessage(BaseModel):
+    content: str
+
+
+# Initialize with our base implementations first
+AgentAction = BaseAgentAction
+AgentFinish = BaseAgentFinish
+HumanMessage = BaseHumanMessage
 
 
 def use_langchain_types():

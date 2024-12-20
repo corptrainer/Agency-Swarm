@@ -194,20 +194,21 @@ class Thread:
             )
 
         # chat model start callback
-        chat_messages = (
-            [[HumanMessage(content=message)]] if isinstance(message, str) else []
-        )
-        if self.callback_handler and chat_messages:
-            self.callback_handler.on_chat_model_start(
-                serialized={"name": self._run.model},
-                messages=chat_messages,
-                run_id=self._run.id,
-                parent_run_id=chain_run_id,
-                metadata={
-                    "agent_name": self.agent.name,
-                    "recipient_agent_name": recipient_agent.name,
-                },
+        if self.callback_handler:
+            chat_messages = (
+                [[HumanMessage(content=message)]] if isinstance(message, str) else []
             )
+            if chat_messages:
+                self.callback_handler.on_chat_model_start(
+                    serialized={"name": self._run.model},
+                    messages=chat_messages,
+                    run_id=self._run.id,
+                    parent_run_id=chain_run_id,
+                    metadata={
+                        "agent_name": self.agent.name,
+                        "recipient_agent_name": recipient_agent.name,
+                    },
+                )
 
         try:
             error_attempts = 0

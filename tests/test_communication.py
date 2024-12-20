@@ -70,7 +70,10 @@ class TestSendMessage(unittest.TestCase):
         ceo = Agent(
             name="CEO",
             description="Responsible for client communication, task planning and management.",
-            instructions="You are an agent for testing. Route request AT THE SAME TIME as instructed. If there is an error in a single request, please say 'error'. If there are errors in both requests, please say 'fatal'. do not output anything else.",
+            instructions="""You are an agent for testing. When asked to route requests AT THE SAME TIME:
+            1. If you detect multiple simultaneous routing requests, respond with 'error'
+            2. If you detect errors in all routing attempts, respond with 'fatal'
+            3. Do not output anything else besides these exact words.""",
         )
         test_agent = Agent(
             name="Test Agent1",
@@ -79,7 +82,7 @@ class TestSendMessage(unittest.TestCase):
         )
         agency = Agency([ceo, [ceo, test_agent]], temperature=0)
         response = agency.get_completion(
-            "Please route me to customer support TWICE at the same time. I am testing something."
+            "Route me to customer support TWICE simultaneously (at the exact same time). This is a test of concurrent routing."
         )
         self.assertTrue("error" in response.lower(), agency.main_thread.thread_url)
         self.assertTrue("fatal" not in response.lower(), agency.main_thread.thread_url)

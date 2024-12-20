@@ -5,7 +5,8 @@ _callback_handler = None
 _lock = threading.Lock()
 
 
-SUPPORTED_TRACKERS = Literal["langfuse", "local"]
+SUPPORTED_TRACKERS = ["langfuse", "local"]
+SUPPORTED_TRACKERS_TYPE = Literal["langfuse", "local"]
 
 
 def get_callback_handler():
@@ -20,7 +21,7 @@ def set_callback_handler(handler: Callable):
         _callback_handler = handler()
 
 
-def init_tracking(tracker_name: SUPPORTED_TRACKERS, **kwargs):
+def init_tracking(tracker_name: SUPPORTED_TRACKERS_TYPE, **kwargs):
     if tracker_name not in SUPPORTED_TRACKERS:
         raise ValueError(f"Invalid tracker name: {tracker_name}")
 

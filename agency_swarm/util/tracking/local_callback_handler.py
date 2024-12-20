@@ -6,10 +6,8 @@ from uuid import UUID
 
 from langchain.schema import AgentAction, AgentFinish, BaseMessage, Document, LLMResult
 
-from agency_swarm.util.tracking.callbacks import CallbackHandler
 
-
-class LocalCallbackHandler(CallbackHandler):
+class LocalCallbackHandler:
     def __init__(self, db_path: str = "usage.db"):
         self.conn = sqlite3.connect(db_path, check_same_thread=False)
         self.lock = threading.Lock()

@@ -9,6 +9,7 @@ from openai import NotFoundError
 from openai.lib._parsing._completions import type_to_response_format_param
 from openai.types.beta.assistant import ToolResources
 
+from agency_swarm.constants import DEFAULT_MODEL
 from agency_swarm.tools import (
     BaseTool,
     CodeInterpreter,
@@ -17,7 +18,6 @@ from agency_swarm.tools import (
     ToolFactory,
 )
 from agency_swarm.tools.oai.FileSearch import FileSearchConfig
-from agency_swarm.util.constants import DEFAULT_MODEL
 from agency_swarm.util.oai import get_openai_client
 from agency_swarm.util.openapi import validate_openapi_spec
 from agency_swarm.util.shared_state import SharedState
