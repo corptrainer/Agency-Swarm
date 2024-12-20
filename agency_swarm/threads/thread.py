@@ -182,7 +182,10 @@ class Thread:
         # Chain start
         if self.callback_handler:
             self.callback_handler.on_chain_start(
-                serialized={"name": f"Thread.get_completion -> {recipient_agent.name}"},
+                serialized={
+                    "name": f"Thread.get_completion -> {recipient_agent.name}",
+                    "id": [self._run.id],
+                },
                 inputs={"message": message},
                 run_id=chain_run_id,
                 parent_run_id=parent_run_id,
@@ -195,12 +198,21 @@ class Thread:
 
         # chat model start callback
         if self.callback_handler:
-            chat_messages = (
-                [[HumanMessage(content=message)]] if isinstance(message, str) else []
-            )
-            if chat_messages:
+            chat_messages = []
+            if isinstance(message, str):
+                chat_messages = [[HumanMessage(content=message)]]
+
+                kwargs = {
+                    "invocation_params": {
+                        "_type": "openai",
+                        "model": self._run.model,
+                        "temperature": self._run.temperature,
+                    },
+                    "name": recipient_agent.name if recipient_agent else "Unknown",
+                }
+
                 self.callback_handler.on_chat_model_start(
-                    serialized={"name": self._run.model},
+                    serialized={"name": kwargs["name"], "id": [self._run.id]},
                     messages=chat_messages,
                     run_id=self._run.id,
                     parent_run_id=chain_run_id,
@@ -208,6 +220,7 @@ class Thread:
                         "agent_name": self.agent.name,
                         "recipient_agent_name": recipient_agent.name,
                     },
+                    **kwargs,
                 )
 
         try:

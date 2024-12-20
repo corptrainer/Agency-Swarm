@@ -1,15 +1,18 @@
+import logging
+
 from dotenv import load_dotenv
 
 from agency_swarm import Agency, Agent
 from agency_swarm.util import init_tracking
 
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
 
 def main():
     # Set the tracker type
-    # TRACKER = "local"
-    TRACKER = "langfuse"
+    TRACKER = "local"
+    # TRACKER = "langfuse"
 
     # Initialize tracking based on the selected tracker
     init_tracking(TRACKER)

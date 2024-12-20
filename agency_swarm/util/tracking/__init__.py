@@ -1,6 +1,8 @@
 import threading
 from typing import Callable, Literal
 
+from .langchain_types import use_langchain_types
+
 _callback_handler = None
 _lock = threading.Lock()
 
@@ -24,8 +26,6 @@ def set_callback_handler(handler: Callable):
 def init_tracking(tracker_name: SUPPORTED_TRACKERS_TYPE, **kwargs):
     if tracker_name not in SUPPORTED_TRACKERS:
         raise ValueError(f"Invalid tracker name: {tracker_name}")
-
-    from .langchain_types import use_langchain_types
 
     use_langchain_types()
 
